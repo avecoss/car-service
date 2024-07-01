@@ -20,7 +20,11 @@ import java.util.Set;
 public class Car {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "object_id")
+    private String objectId;
 
     @NotNull
     @Pattern(regexp = "^\\d{4}$")

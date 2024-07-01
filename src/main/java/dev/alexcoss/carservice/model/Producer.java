@@ -20,5 +20,6 @@ public class Producer {
     private Long id;
 
     @NotNull
+    @Column(unique = true, nullable = false)
     private String name;
 }

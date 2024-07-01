@@ -1,9 +1,11 @@
 package dev.alexcoss.carservice.model;
 
 import com.opencsv.bean.CsvBindByName;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class CarCsv {
 
     @CsvBindByName(column = "objectId")

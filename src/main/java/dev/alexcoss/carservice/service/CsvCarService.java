@@ -7,10 +7,10 @@ import dev.alexcoss.carservice.repository.CarRepository;
 import dev.alexcoss.carservice.repository.CategoryRepository;
 import dev.alexcoss.carservice.repository.ProducerRepository;
 import dev.alexcoss.carservice.util.exception.CsvFileNotFoundException;
-import dev.alexcoss.carservice.util.exception.DuplicateIdException;
 import dev.alexcoss.carservice.util.exception.FileReadException;
 import dev.alexcoss.carservice.util.exception.IllegalIdException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CsvCarService {
@@ -45,27 +46,27 @@ public class CsvCarService {
                 .parse();
 
         } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
             throw new CsvFileNotFoundException(e.getMessage());
         } catch (IOException e) {
+            log.error(e.getMessage());
             throw new FileReadException(e.getMessage());
         }
     }
 
     private void saveCarsToDatabase(List<CarCsv> cars) {
         for (CarCsv carCsv : cars) {
-            if (carCsv.getObjectId() == null)
+            if (carCsv.getObjectId() == null) {
+                log.error("Illegal ID. ID cannot be null. Cannot save car.");
                 throw new IllegalIdException("Car ID cannot be null");
-
-            if (carRepository.existsById(carCsv.getObjectId()))
-                throw new DuplicateIdException("Duplicate ID: " + carCsv.getObjectId());
+            }
 
             Producer producer = getOrCreateProducer(carCsv);
-            System.out.println(producer);
             CarModel model = getOrCreateCarModel(carCsv, producer);
             Set<Category> categories = getOrCreateCategories(carCsv);
 
             Car car = Car.builder()
-                .id(carCsv.getObjectId())
+                .objectId(carCsv.getObjectId())
                 .year(carCsv.getYear())
                 .carModel(model)
                 .categories(categories)

@@ -14,7 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class CarDTO {
-    private String id;
+    private Long id;
+    private String objectId;
     @Pattern(regexp = "^\\d{4}$")
     private String year;
     private CarModelDTO carModel;

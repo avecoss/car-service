@@ -28,3 +28,10 @@ spring:
                     batch_size: 100
                 order_updates: true
                 order_inserts: true
+
+logging:
+    file:
+        path: ./logs
+        name: file.log
+    level:
+        root: info
