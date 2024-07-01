@@ -58,7 +58,7 @@ public class CarService {
             .collect(Collectors.toSet());
         existingCar.setCategories(categories);
 
-        Car updated = carRepository.save(existingCar); //todo check
+        Car updated = carRepository.save(existingCar);
         return modelMapper.map(updated, CarDTO.class);
     }
 

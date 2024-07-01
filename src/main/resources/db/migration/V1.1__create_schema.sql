@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS car.car
 
 CREATE TABLE IF NOT EXISTS car.car_category
 (
-    car_id      BIGSERIAL REFERENCES car.car (id) ON DELETE CASCADE,
+    car_id      BIGINT REFERENCES car.car (id) ON DELETE CASCADE,
     category_id BIGINT REFERENCES car.category (category_id) ON DELETE CASCADE,
     PRIMARY KEY (car_id, category_id)
 )

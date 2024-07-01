@@ -24,25 +24,3 @@
     </root>
 
 </configuration>
-
-<!--
-<configuration>
-<property name="LOG_DIR" value="./logs" />
-
-<include resource="org/springframework/boot/logging/logback/defaults.xml" />
-<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-
-<appender name="FILE-LOG" class="ch.qos.logback.core.FileAppender">
-    <file>${LOG_DIR}/logs.log</file>
-    <append>true</append>
-    <encoder>
-        <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} -&#45;&#45; [%thread] %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>
-        <charset>utf-8</charset>
-    </encoder>
-</appender>
-
-<root level="info">
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE-LOG"/>
-</root>
-</configuration>-->
