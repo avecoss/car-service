@@ -1,7 +1,6 @@
 package dev.alexcoss.carservice.controller;
 
 import dev.alexcoss.carservice.dto.CarDTO;
-import dev.alexcoss.carservice.dto.request.CarRequestDTO;
 import dev.alexcoss.carservice.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,20 +18,18 @@ public class CarController {
 
     private final CarService carService;
 
-    @PostMapping("/{manufacturer}/{model}/{year}")
-    public ResponseEntity<CarDTO> createCar(@PathVariable String manufacturer, @PathVariable String model,
-                                            @PathVariable String year, @RequestBody CarDTO carDTO) {
-        CarRequestDTO carRequestDTO = new CarRequestDTO(manufacturer, model, year, carDTO);
-        CarDTO createdCar = carService.createCar(carRequestDTO);
-        URI location = URI.create(String.format("/api/v1/cars?manufacturer=%s&model=%s&minYear=%s", manufacturer, model, year));
+    @PostMapping
+    public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
+        CarDTO createdCar = carService.createCar(carDTO);
+        URI location = URI.create(String.format("/api/v1/cars?manufacturer=%s&model=%s&minYear=%s",
+            carDTO.getCarModel().getProducer().getName(), carDTO.getCarModel().getName(), carDTO.getYear()));
         return ResponseEntity.created(location).body(createdCar);
     }
 
-    @PatchMapping("/{manufacturer}/{model}/{year}")
-    public ResponseEntity<CarDTO> updateCar(@PathVariable String manufacturer, @PathVariable String model,
-                                            @PathVariable String year, @RequestBody CarDTO carDTO) {
-        CarRequestDTO carRequestDTO = new CarRequestDTO(manufacturer, model, year, carDTO);
-        return ResponseEntity.ok(carService.updateCar(carRequestDTO));
+    @PatchMapping("/{id}")
+    public ResponseEntity<CarDTO> updateCar(@PathVariable Long id, @RequestBody CarDTO carDTO) {
+        carDTO.setId(id);
+        return ResponseEntity.ok(carService.updateCar(carDTO));
     }
 
     @GetMapping
@@ -46,10 +43,9 @@ public class CarController {
         return ResponseEntity.ok(carService.getListCarsWithPagination(manufacturer, model, minYear, maxYear, category, pageable));
     }
 
-    @DeleteMapping("/{manufacturer}/{model}/{year}")
-    public ResponseEntity<Void> deleteCar(@PathVariable String manufacturer, @PathVariable String model, @PathVariable String year) {
-        CarRequestDTO carRequestDTO = new CarRequestDTO(manufacturer, model, year);
-        carService.deleteCar(carRequestDTO);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
+        carService.deleteCar(id);
         return ResponseEntity.noContent().build();
     }
 }

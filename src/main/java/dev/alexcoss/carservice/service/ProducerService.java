@@ -2,8 +2,7 @@ package dev.alexcoss.carservice.service;
 
 import dev.alexcoss.carservice.dto.ProducerDTO;
 import dev.alexcoss.carservice.model.Producer;
-import dev.alexcoss.carservice.repository.*;
-import dev.alexcoss.carservice.util.exception.EntityAlreadyExistsException;
+import dev.alexcoss.carservice.repository.ProducerRepository;
 import dev.alexcoss.carservice.util.exception.EntityNotExistException;
 import dev.alexcoss.carservice.util.exception.IllegalProducerException;
 import lombok.RequiredArgsConstructor;
@@ -31,36 +30,34 @@ public class ProducerService {
     @Transactional
     public ProducerDTO createProducer(ProducerDTO producerDTO) {
         isValidProducer(producerDTO);
-        if (producerRepository.findByName(producerDTO.getName()).isPresent()) {
-            log.error("Producer with name {} already exists", producerDTO.getName());
-            throw new EntityAlreadyExistsException("Producer with name " + producerDTO.getName() + " already exists");
-        }
-
         Producer savedProducer = producerRepository.save(modelMapper.map(producerDTO, Producer.class));
         return modelMapper.map(savedProducer, ProducerDTO.class);
     }
 
     @Transactional
-    public ProducerDTO updateProducer(String currentName, ProducerDTO producerDTO) {
+    public ProducerDTO updateProducer(ProducerDTO producerDTO) {
         isValidProducer(producerDTO);
-        Producer existingProducer = producerRepository.findByName(currentName)
-            .orElseThrow(() -> getEntityNotExistException(currentName));
-        existingProducer.setName(producerDTO.getName());
+        Producer existingProducer = producerRepository.findById(producerDTO.getId())
+            .map(producer -> {
+                producer.setName(producerDTO.getName());
+                return producer;
+            })
+            .orElseThrow(() -> getEntityNotExistException(producerDTO.getId()));
 
         Producer updatedProducer = producerRepository.save(existingProducer);
         return modelMapper.map(updatedProducer, ProducerDTO.class);
     }
 
     @Transactional
-    public void deleteProducer(String name) {
-        Producer producer = producerRepository.findByName(name)
-            .orElseThrow(() -> getEntityNotExistException(name));
+    public void deleteProducer(Long id) {
+        Producer producer = producerRepository.findById(id)
+            .orElseThrow(() -> getEntityNotExistException(id));
         producerRepository.delete(producer);
     }
 
-    private EntityNotExistException getEntityNotExistException(String currentName) {
-        log.error("Producer with name {} does not exist", currentName);
-        return new EntityNotExistException("Producer: " + currentName + " not found");
+    private EntityNotExistException getEntityNotExistException(Long id) {
+        log.error("Producer with id {} does not exist", id);
+        return new EntityNotExistException("Producer: " + id + " not found");
     }
 
     private void isValidProducer(ProducerDTO producerDTO) {

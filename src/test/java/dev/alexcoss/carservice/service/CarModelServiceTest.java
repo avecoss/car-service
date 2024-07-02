@@ -8,6 +8,7 @@ import dev.alexcoss.carservice.model.Producer;
 import dev.alexcoss.carservice.repository.CarModelRepository;
 import dev.alexcoss.carservice.repository.ProducerRepository;
 import dev.alexcoss.carservice.util.exception.EntityNotExistException;
+import dev.alexcoss.carservice.util.exception.IllegalModelException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,99 +29,101 @@ class CarModelServiceTest {
     private CarModelRepository carModelRepository;
 
     @Mock
-    private ProducerRepository producerRepository;
-
-    @Mock
     private ModelMapper modelMapper;
 
     @InjectMocks
     private CarModelService carModelService;
 
-
     @Test
-    void testCreateCarModelWithValidProducer() {
-        ModelRequestDTO modelRequestDTO = new ModelRequestDTO();
+    void testCreateCarModel() {
         CarModelDTO carModelDTO = new CarModelDTO();
         carModelDTO.setName("Model S");
-        modelRequestDTO.setCarModelDTO(carModelDTO);
-        modelRequestDTO.setManufacturer("Tesla");
-
-        Producer producer = new Producer();
-        producer.setName("Tesla");
+        ProducerDTO producerDTO = new ProducerDTO();
+        producerDTO.setId(1L);
+        producerDTO.setName("Producer");
+        carModelDTO.setProducer(producerDTO);
 
         CarModel carModel = new CarModel();
         carModel.setName("Model S");
 
-        when(producerRepository.findByName("Tesla")).thenReturn(Optional.of(producer));
-        when(modelMapper.map(any(Producer.class), any())).thenReturn(new ProducerDTO());
-        when(modelMapper.map(any(CarModelDTO.class), any())).thenReturn(carModel);
+        when(modelMapper.map(any(CarModelDTO.class), eq(CarModel.class))).thenReturn(carModel);
         when(carModelRepository.save(any(CarModel.class))).thenReturn(carModel);
-        when(modelMapper.map(any(CarModel.class), any())).thenReturn(carModelDTO);
+        when(modelMapper.map(any(CarModel.class), eq(CarModelDTO.class))).thenReturn(carModelDTO);
 
-        CarModelDTO createdCarModelDTO = carModelService.createCarModel(modelRequestDTO);
+        CarModelDTO createdCarModelDTO = carModelService.createCarModel(carModelDTO);
 
         assertNotNull(createdCarModelDTO);
-        verify(producerRepository, times(1)).findByName("Tesla");
+        assertEquals("Model S", createdCarModelDTO.getName());
         verify(carModelRepository, times(1)).save(any(CarModel.class));
+        verify(modelMapper, times(1)).map(any(CarModelDTO.class), eq(CarModel.class));
+        verify(modelMapper, times(1)).map(any(CarModel.class), eq(CarModelDTO.class));
     }
 
     @Test
     void testUpdateCarModel() {
-        ModelRequestDTO modelRequestDTO = new ModelRequestDTO();
         CarModelDTO carModelDTO = new CarModelDTO();
+        carModelDTO.setId(1L);
         carModelDTO.setName("Model 3");
-        modelRequestDTO.setCarModelDTO(carModelDTO);
-        modelRequestDTO.setManufacturer("Tesla");
-        modelRequestDTO.setModel("Model S");
+        ProducerDTO producerDTO = new ProducerDTO();
+        producerDTO.setId(1L);
+        producerDTO.setName("Producer");
+        carModelDTO.setProducer(producerDTO);
 
         CarModel existingCarModel = new CarModel();
-        existingCarModel.setName("Model S");
+        existingCarModel.setId(1L);
+        existingCarModel.setName("OldName");
+        Producer existingProducer = new Producer();
+        existingProducer.setId(1L);
+        existingProducer.setName("Producer");
+        existingCarModel.setProducer(existingProducer);
 
         CarModel updatedCarModel = new CarModel();
+        updatedCarModel.setId(1L);
         updatedCarModel.setName("Model 3");
+        updatedCarModel.setProducer(existingProducer);
 
-        when(carModelRepository.findByProducerNameAndName("Tesla", "Model S")).thenReturn(Optional.of(existingCarModel));
+        when(carModelRepository.findById(carModelDTO.getId())).thenReturn(Optional.of(existingCarModel));
         when(carModelRepository.save(any(CarModel.class))).thenReturn(updatedCarModel);
-        when(modelMapper.map(any(CarModel.class), any())).thenReturn(carModelDTO);
 
-        CarModelDTO updatedCarModelDTO = carModelService.updateCarModel(modelRequestDTO);
+        doReturn(existingProducer).when(modelMapper).map(producerDTO, Producer.class);
+        doReturn(carModelDTO).when(modelMapper).map(updatedCarModel, CarModelDTO.class);
+
+        CarModelDTO updatedCarModelDTO = carModelService.updateCarModel(carModelDTO);
 
         assertNotNull(updatedCarModelDTO);
-        verify(carModelRepository, times(1)).findByProducerNameAndName("Tesla", "Model S");
+        assertEquals("Model 3", updatedCarModelDTO.getName());
+        verify(carModelRepository, times(1)).findById(carModelDTO.getId());
         verify(carModelRepository, times(1)).save(existingCarModel);
-        verify(modelMapper, times(1)).map(any(CarModel.class), any());
+        verify(modelMapper, times(1)).map(updatedCarModel, CarModelDTO.class);
+        verify(modelMapper, times(1)).map(producerDTO, Producer.class);
     }
 
+
     @Test
-    void testCreateCarModelProducerNotFound() {
-        ModelRequestDTO modelRequestDTO = new ModelRequestDTO();
+    void testCreateCarModelInvalidCarModel() {
         CarModelDTO carModelDTO = new CarModelDTO();
-        carModelDTO.setName("Model X");
-        modelRequestDTO.setCarModelDTO(carModelDTO);
-        modelRequestDTO.setManufacturer("Unknown");
+        carModelDTO.setName("");
 
-        when(producerRepository.findByName("Unknown")).thenReturn(Optional.empty());
+        assertThrows(IllegalModelException.class, () -> carModelService.createCarModel(carModelDTO));
 
-        assertThrows(EntityNotExistException.class, () -> carModelService.createCarModel(modelRequestDTO));
-
-        verify(producerRepository, times(1)).findByName("Unknown");
         verify(carModelRepository, times(0)).save(any(CarModel.class));
     }
 
     @Test
     void testUpdateCarModelNotFound() {
-        ModelRequestDTO modelRequestDTO = new ModelRequestDTO();
         CarModelDTO carModelDTO = new CarModelDTO();
+        carModelDTO.setId(1L);
         carModelDTO.setName("Model Y");
-        modelRequestDTO.setCarModelDTO(carModelDTO);
-        modelRequestDTO.setManufacturer("Tesla");
-        modelRequestDTO.setModel("Unknown");
+        ProducerDTO producerDTO = new ProducerDTO();
+        producerDTO.setId(1L);
+        producerDTO.setName("Producer");
+        carModelDTO.setProducer(producerDTO);
 
-        when(carModelRepository.findByProducerNameAndName("Tesla", "Unknown")).thenReturn(Optional.empty());
+        when(carModelRepository.findById(carModelDTO.getId())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotExistException.class, () -> carModelService.updateCarModel(modelRequestDTO));
+        assertThrows(EntityNotExistException.class, () -> carModelService.updateCarModel(carModelDTO));
 
-        verify(carModelRepository, times(1)).findByProducerNameAndName("Tesla", "Unknown");
+        verify(carModelRepository, times(1)).findById(carModelDTO.getId());
         verify(carModelRepository, times(0)).save(any(CarModel.class));
     }
 }

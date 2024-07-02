@@ -1,7 +1,9 @@
 package dev.alexcoss.carservice.controller;
 
+import dev.alexcoss.carservice.dto.CarModelDTO;
 import dev.alexcoss.carservice.dto.ProducerDTO;
-import dev.alexcoss.carservice.service.ProducerService;
+import dev.alexcoss.carservice.dto.request.ModelRequestDTO;
+import dev.alexcoss.carservice.service.CarModelService;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -21,66 +23,67 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ManufacturerController.class)
+@WebMvcTest(CarModelController.class)
 @AutoConfigureMockMvc
-class ManufacturerControllerTest {
+class CarModelControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private ProducerService producerService;
+    private CarModelService carModelService;
 
     @Test
     @WithMockUser
-    void testCreateProducer() throws Exception {
-        ProducerDTO producerDTO = new ProducerDTO();
-        producerDTO.setId(1L);
-        producerDTO.setName("TestProducer");
+    void testCreateCarModel() throws Exception {
+        CarModelDTO carModelDTO = CarModelDTO.builder()
+            .id(1L)
+            .name("TestModel")
+            .producer(ProducerDTO.builder()
+                .id(1L)
+                .name("TestManufacturer")
+                .build())
+            .build();
+        Mockito.when(carModelService.createCarModel(any(CarModelDTO.class))).thenReturn(carModelDTO);
 
-        when(producerService.createProducer(any(ProducerDTO.class))).thenReturn(producerDTO);
-
-        mockMvc.perform(post("/api/v1/manufacturers")
+        mockMvc.perform(post("/api/v1/models")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1,\"name\": \"TestProducer\"}")
+                .content("{\"model\": \"TestModel\"}")
                 .with(csrf()))
             .andExpect(status().isCreated())
-            .andExpect(header().string("Location", "/api/v1/manufacturers"))
-            .andExpect(jsonPath("$.id").value("1"))
-            .andExpect(jsonPath("$.name").value("TestProducer"));
+            .andExpect(header().string("Location", "/api/v1/models"))
+            .andExpect(jsonPath("$.name").value(carModelDTO.getName()));
     }
 
     @Test
     @WithMockUser
-    void testUpdateProducer() throws Exception {
-        ProducerDTO producerDTO = new ProducerDTO();
-        producerDTO.setId(1L);
-        producerDTO.setName("UpdatedProducer");
-        Mockito.when(producerService.updateProducer(any(ProducerDTO.class))).thenReturn(producerDTO);
+    void testUpdateCarModel() throws Exception {
+        CarModelDTO carModelDTO = new CarModelDTO();
+        carModelDTO.setId(1L);
+        carModelDTO.setName("UpdatedModel");
+        Mockito.when(carModelService.updateCarModel(any(CarModelDTO.class))).thenReturn(carModelDTO);
 
-        mockMvc.perform(patch("/api/v1/manufacturers/1")
+        mockMvc.perform(patch("/api/v1/models/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"UpdatedProducer\"}")
+                .content("{\"id\": 1, \"model\": \"UpdatedModel\"}")
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("UpdatedProducer"));
+            .andExpect(jsonPath("$.name").value("UpdatedModel"));
     }
 
     @Test
     @WithMockUser
-    void testListOfProducers() throws Exception {
+    void testListCarModels() throws Exception {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ProducerDTO> page = new PageImpl<>(Collections.singletonList(new ProducerDTO()));
-        Mockito.when(producerService.getListOfProducers(any(Pageable.class))).thenReturn(page);
+        Page<CarModelDTO> page = new PageImpl<>(Collections.singletonList(new CarModelDTO()));
+        Mockito.when(carModelService.getListCarModels(anyString(), any(Pageable.class))).thenReturn(page);
 
-        mockMvc.perform(get("/api/v1/manufacturers")
+        mockMvc.perform(get("/api/v1/models?manufacturer=TestModel")
                 .param("page", "0")
                 .param("size", "10")
                 .with(csrf()))
@@ -90,10 +93,10 @@ class ManufacturerControllerTest {
 
     @Test
     @WithMockUser
-    void testDeleteProducer() throws Exception {
-        Mockito.doNothing().when(producerService).deleteProducer(anyLong());
+    void testDeleteCarModel() throws Exception {
+        Mockito.doNothing().when(carModelService).deleteCarModel(anyLong());
 
-        mockMvc.perform(delete("/api/v1/manufacturers/1").with(csrf()))
+        mockMvc.perform(delete("/api/v1/models/1").with(csrf()))
             .andExpect(status().isNoContent());
     }
 }

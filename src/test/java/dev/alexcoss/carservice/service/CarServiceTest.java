@@ -4,7 +4,6 @@ import dev.alexcoss.carservice.dto.CarDTO;
 import dev.alexcoss.carservice.dto.CarModelDTO;
 import dev.alexcoss.carservice.dto.CategoryDTO;
 import dev.alexcoss.carservice.dto.ProducerDTO;
-import dev.alexcoss.carservice.dto.request.CarRequestDTO;
 import dev.alexcoss.carservice.model.Car;
 import dev.alexcoss.carservice.model.CarModel;
 import dev.alexcoss.carservice.model.Category;
@@ -55,7 +54,6 @@ class CarServiceTest {
         String manufacturer = "Tesla";
         String model = "Model S";
         CarDTO carDTO = getCarDTO(year, manufacturer, model);
-        CarRequestDTO carRequestDTO = getCarRequestDTO(manufacturer, model, year, carDTO);
 
         CarModel carModel = new CarModel();
         carModel.setName(model);
@@ -64,18 +62,15 @@ class CarServiceTest {
         car.setYear(year);
         car.setCarModel(carModel);
 
-        when(carModelRepository.findByProducerNameAndName(manufacturer, model)).thenReturn(Optional.of(carModel));
-        when(modelMapper.map(any(CarModel.class), eq(CarModelDTO.class))).thenReturn(new CarModelDTO());
         when(modelMapper.map(any(CarDTO.class), eq(Car.class))).thenReturn(car);
         when(carRepository.save(any(Car.class))).thenReturn(car);
         when(modelMapper.map(any(Car.class), eq(CarDTO.class))).thenReturn(carDTO);
 
-        CarDTO createdCarDTO = carService.createCar(carRequestDTO);
+        CarDTO createdCarDTO = carService.createCar(carDTO);
 
         assertNotNull(createdCarDTO);
-        verify(carModelRepository, times(1)).findByProducerNameAndName(manufacturer, model);
         verify(carRepository, times(1)).save(any(Car.class));
-        verify(modelMapper, times(3)).map(any(), any());
+        verify(modelMapper, times(2)).map(any(), any());
     }
 
     @Test
@@ -84,51 +79,20 @@ class CarServiceTest {
         String manufacturer = "Tesla";
         String model = "Model S";
         CarDTO carDTO = getCarDTO(year, manufacturer, model);
-        CarRequestDTO carRequestDTO = getCarRequestDTO(manufacturer, model, year, carDTO);
-        CarModelDTO carModelDTO = getCarModelDTO(manufacturer, model);
+        Car existingCar = new Car();
+        CarModel carModel = new CarModel();
+        carModel.setName(carDTO.getCarModel().getName());
+        existingCar.setCarModel(carModel);
 
-        Producer producer = Producer.builder()
-            .id(1L)
-            .name(manufacturer)
-            .build();
-        CarModel carModel = CarModel.builder()
-            .id(1L)
-            .name(model)
-            .producer(producer)
-            .build();
-        Car existingCar = Car.builder()
-            .id(1L)
-            .year(year)
-            .carModel(carModel)
-            .build();
+        when(carRepository.findById(carDTO.getId())).thenReturn(Optional.of(existingCar));
+        when(modelMapper.map(carDTO.getCarModel(), CarModel.class)).thenReturn(carModel);
+        when(carRepository.save(any(Car.class))).thenReturn(existingCar);
+        when(modelMapper.map(any(Car.class), eq(CarDTO.class))).thenReturn(carDTO);
 
-        Car updatedCar = new Car();
-        updatedCar.setId(1L);
-        updatedCar.setYear("2023");
-        updatedCar.setCarModel(carModel);
-
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setId(1L);
-        categoryDTO.setName("Sedan");
-        Set<CategoryDTO> categoriesDTO = Set.of(categoryDTO);
-        carDTO.setCategories(categoriesDTO);
-
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Sedan");
-        Set<Category> categories = Set.of(category);
-        updatedCar.setCategories(categories);
-
-        when(carRepository.findByCarModelNameAndYear(model, year)).thenReturn(Optional.of(existingCar));
-        when(modelMapper.map(carModelDTO, CarModel.class)).thenReturn(carModel);
-        when(modelMapper.map(categoryDTO, Category.class)).thenReturn(category);
-        when(carRepository.save(existingCar)).thenReturn(updatedCar);
-        when(modelMapper.map(updatedCar, CarDTO.class)).thenReturn(carDTO);
-
-        CarDTO updatedCarDTO = carService.updateCar(carRequestDTO);
+        CarDTO updatedCarDTO = carService.updateCar(carDTO);
 
         assertNotNull(updatedCarDTO);
-        verify(carRepository, times(1)).findByCarModelNameAndYear(model, year);
+        verify(carRepository, times(1)).findById(carDTO.getId());
         verify(carRepository, times(1)).save(any(Car.class));
     }
 
@@ -158,41 +122,15 @@ class CarServiceTest {
     }
 
     @Test
-    void testCreateCarWithModelNotFound() {
-        CarRequestDTO carRequestDTO = new CarRequestDTO();
-        carRequestDTO.setManufacturer("Unknown");
-        carRequestDTO.setModel("UnknownModel");
-
-        when(carModelRepository.findByProducerNameAndName("Unknown", "UnknownModel")).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotExistException.class, () -> carService.createCar(carRequestDTO));
-
-        verify(carModelRepository, times(1)).findByProducerNameAndName("Unknown", "UnknownModel");
-        verify(carRepository, times(0)).save(any(Car.class));
-    }
-
-    @Test
     void testUpdateCarWithCarNotFound() {
-        CarRequestDTO carRequestDTO = new CarRequestDTO();
-        carRequestDTO.setManufacturer("Tesla");
-        carRequestDTO.setModel("Model S");
-        carRequestDTO.setYear("2022");
+        CarDTO carDTO = new CarDTO();
 
-        when(carRepository.findByCarModelNameAndYear("Model S", "2022")).thenReturn(Optional.empty());
+        when(carRepository.findById(carDTO.getId())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotExistException.class, () -> carService.updateCar(carRequestDTO));
+        assertThrows(EntityNotExistException.class, () -> carService.updateCar(carDTO));
 
-        verify(carRepository, times(1)).findByCarModelNameAndYear("Model S", "2022");
+        verify(carRepository, times(1)).findById(carDTO.getId());
         verify(carRepository, times(0)).save(any(Car.class));
-    }
-
-    private CarRequestDTO getCarRequestDTO(String manufacturer, String model, String year, CarDTO carDTO) {
-        CarRequestDTO carRequestDTO = new CarRequestDTO();
-        carRequestDTO.setManufacturer(manufacturer);
-        carRequestDTO.setModel(model);
-        carRequestDTO.setYear(year);
-        carRequestDTO.setCarDTO(carDTO);
-        return carRequestDTO;
     }
 
     private CarDTO getCarDTO(String year, String producer, String model) {

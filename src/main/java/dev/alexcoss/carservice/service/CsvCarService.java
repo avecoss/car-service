@@ -92,7 +92,7 @@ public class CsvCarService {
     }
 
     private CarModel getOrCreateCarModel(CarCsv carCsv, Producer producer) {
-        return carModelRepository.findByName(carCsv.getModel())
+        return carModelRepository.findByProducerNameAndName(carCsv.getModel(), producer.getName())
             .orElseGet(() -> {
                 CarModel newModel = CarModel.builder()
                     .name(carCsv.getModel())

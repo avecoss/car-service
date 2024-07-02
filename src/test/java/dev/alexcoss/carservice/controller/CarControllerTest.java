@@ -3,7 +3,6 @@ package dev.alexcoss.carservice.controller;
 import dev.alexcoss.carservice.dto.CarDTO;
 import dev.alexcoss.carservice.dto.CarModelDTO;
 import dev.alexcoss.carservice.dto.ProducerDTO;
-import dev.alexcoss.carservice.dto.request.CarRequestDTO;
 import dev.alexcoss.carservice.service.CarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,9 +64,9 @@ class CarControllerTest {
     @Test
     @WithMockUser
     public void testCreateCar() throws Exception {
-        when(carService.createCar(any(CarRequestDTO.class))).thenReturn(carDTO);
+        when(carService.createCar(any(CarDTO.class))).thenReturn(carDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars/Audi/Q3/2020")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"objectId\":\"testId\",\"year\":\"2020\",\"carModel\":{\"id\":1,\"name\":\"Q3\",\"producer\":{\"id\":1,\"name\":\"Audi\"}},\"categories\":[]}")
                 .with(csrf()))
@@ -106,9 +105,9 @@ class CarControllerTest {
     @Test
     @WithMockUser
     void testUpdateCar() throws Exception {
-        when(carService.updateCar(any(CarRequestDTO.class))).thenReturn(carDTO);
+        when(carService.updateCar(any(CarDTO.class))).thenReturn(carDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/cars/Audi/Q3/2020")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/cars/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"objectId\":\"testId\",\"year\":\"2020\",\"carModel\":{\"id\":1,\"name\":\"Q3\",\"producer\":{\"id\":1,\"name\":\"Audi\"}},\"categories\":[]}")
                 .with(csrf()))
@@ -123,7 +122,7 @@ class CarControllerTest {
     @Test
     @WithMockUser
     void testDeleteCar() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/cars/Audi/Q3/2021").with(csrf()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/cars/1").with(csrf()))
             .andExpect(status().isNoContent());
     }
 }

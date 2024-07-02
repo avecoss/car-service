@@ -10,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface CarModelRepository extends JpaRepository<CarModel, Long> {
-    Optional<CarModel> findByName(String model);
-
     Optional<CarModel> findByProducerNameAndName(String producerName, String name);
 
     Page<CarModel> findByProducerName(String producerName, Pageable pageable);
