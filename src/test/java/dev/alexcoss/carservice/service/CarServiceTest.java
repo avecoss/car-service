@@ -1,14 +1,11 @@
 package dev.alexcoss.carservice.service;
 
 import dev.alexcoss.carservice.dto.CarDTO;
+import dev.alexcoss.carservice.dto.CarFilterDTO;
 import dev.alexcoss.carservice.dto.CarModelDTO;
-import dev.alexcoss.carservice.dto.CategoryDTO;
 import dev.alexcoss.carservice.dto.ProducerDTO;
 import dev.alexcoss.carservice.model.Car;
 import dev.alexcoss.carservice.model.CarModel;
-import dev.alexcoss.carservice.model.Category;
-import dev.alexcoss.carservice.model.Producer;
-import dev.alexcoss.carservice.repository.CarModelRepository;
 import dev.alexcoss.carservice.repository.CarRepository;
 import dev.alexcoss.carservice.util.exception.EntityNotExistException;
 import org.junit.jupiter.api.Test;
@@ -25,7 +22,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,9 +34,6 @@ class CarServiceTest {
 
     @Mock
     private CarRepository carRepository;
-
-    @Mock
-    private CarModelRepository carModelRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -98,6 +91,7 @@ class CarServiceTest {
 
     @Test
     void testGetListCarsWithPagination() {
+
         String producerName = "Tesla";
         String modelName = "Model S";
         Integer minYear = 2020;
@@ -115,7 +109,7 @@ class CarServiceTest {
         when(carRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(carPage);
         when(modelMapper.map(any(Car.class), eq(CarDTO.class))).thenReturn(new CarDTO());
 
-        Page<CarDTO> result = carService.getListCarsWithPagination(producerName, modelName, minYear, maxYear, category, pageable);
+        Page<CarDTO> result = carService.getListCarsWithPagination(new CarFilterDTO(producerName, modelName, minYear, maxYear, category, pageable));
 
         verify(carRepository, times(1)).findAll(any(Specification.class), eq(pageable));
         verify(modelMapper, times(1)).map(any(Car.class), eq(CarDTO.class));

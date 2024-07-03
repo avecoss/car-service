@@ -24,6 +24,12 @@ public class CarModelService {
     private final CarModelRepository carModelRepository;
     private final ModelMapper modelMapper;
 
+    public CarModelDTO getCarModelById(Long id) {
+        CarModel carModel = carModelRepository.findById(id)
+            .orElseThrow(() -> getEntityNotExistException(id));
+        return modelMapper.map(carModel, CarModelDTO.class);
+    }
+
     @Transactional
     public CarModelDTO createCarModel(CarModelDTO carModelDTO) {
         isValidCarModel(carModelDTO);

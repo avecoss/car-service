@@ -2,11 +2,9 @@ package dev.alexcoss.carservice.service;
 
 import dev.alexcoss.carservice.dto.CarModelDTO;
 import dev.alexcoss.carservice.dto.ProducerDTO;
-import dev.alexcoss.carservice.dto.request.ModelRequestDTO;
 import dev.alexcoss.carservice.model.CarModel;
 import dev.alexcoss.carservice.model.Producer;
 import dev.alexcoss.carservice.repository.CarModelRepository;
-import dev.alexcoss.carservice.repository.ProducerRepository;
 import dev.alexcoss.carservice.util.exception.EntityNotExistException;
 import dev.alexcoss.carservice.util.exception.IllegalModelException;
 import org.junit.jupiter.api.Test;
@@ -18,9 +16,9 @@ import org.modelmapper.ModelMapper;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class CarModelServiceTest {

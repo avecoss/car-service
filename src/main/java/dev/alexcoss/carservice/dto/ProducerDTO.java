@@ -1,16 +1,15 @@
 package dev.alexcoss.carservice.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Builder
-public class ProducerDTO {
+public class ProducerDTO extends RepresentationModel<ProducerDTO> {
     private Long id;
     @NotNull
     private String name;

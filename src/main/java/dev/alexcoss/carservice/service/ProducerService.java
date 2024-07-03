@@ -22,6 +22,12 @@ public class ProducerService {
     private final ProducerRepository producerRepository;
     private final ModelMapper modelMapper;
 
+    public ProducerDTO getProducerById(Long id) {
+        Producer producer = producerRepository.findById(id)
+            .orElseThrow(() -> getEntityNotExistException(id));
+        return modelMapper.map(producer, ProducerDTO.class);
+    }
+
     public Page<ProducerDTO> getListOfProducers(Pageable pageable) {
         return producerRepository.findAll(pageable)
             .map(producer -> modelMapper.map(producer, ProducerDTO.class));
