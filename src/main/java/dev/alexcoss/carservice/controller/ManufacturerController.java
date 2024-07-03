@@ -21,7 +21,8 @@ public class ManufacturerController {
     private final ProducerService producerService;
     private final ManufacturerLinkHelper linkHelper;
 
-    public ResponseEntity<ProducerDTO> getProducer(Long id) {
+    @GetMapping("{/id}")
+    public ResponseEntity<ProducerDTO> getProducer(@PathVariable Long id) {
         ProducerDTO producerDTO = producerService.getProducerById(id);
         producerDTO.add(linkHelper.createSelfLink(id));
         producerDTO.add(linkHelper.createManufacturersLink());
