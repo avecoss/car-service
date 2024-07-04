@@ -119,7 +119,7 @@ class CarControllerTest {
         when(linkHelper.createSelfLink(anyLong())).thenReturn(Link.of("selfLink"));
         when(linkHelper.createCarsLink()).thenReturn(Link.of("carsLink"));
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/cars/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/cars")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"objectId\":\"testId\",\"year\":\"2020\",\"carModel\":{\"id\":1,\"name\":\"Q3\",\"producer\":{\"id\":1,\"name\":\"Audi\"}},\"categories\":[]}")
                 .with(csrf()))

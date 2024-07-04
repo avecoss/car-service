@@ -21,7 +21,7 @@ public class ManufacturerController {
     private final ProducerService producerService;
     private final ManufacturerLinkHelper linkHelper;
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ProducerDTO> getProducer(@PathVariable Long id) {
         ProducerDTO producerDTO = producerService.getProducerById(id);
         producerDTO.add(linkHelper.createSelfLink(id));
@@ -43,10 +43,8 @@ public class ManufacturerController {
         return ResponseEntity.created(location).body(createdProducer);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ProducerDTO> updateProducer(@PathVariable Long id, @RequestBody @Validated ProducerDTO producerDTO) {
-        producerDTO.setId(id);
-
+    @PatchMapping
+    public ResponseEntity<ProducerDTO> updateProducer(@RequestBody @Validated ProducerDTO producerDTO) {
         ProducerDTO updatedProducerDTO = producerService.updateProducer(producerDTO);
         updatedProducerDTO.add(linkHelper.createSelfLink(updatedProducerDTO.getId()));
         updatedProducerDTO.add(linkHelper.createManufacturersLink());

@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
@@ -22,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -75,7 +74,7 @@ class ManufacturerControllerTest {
         when(linkHelper.createSelfLink(anyLong())).thenReturn(Link.of("selfLink"));
         when(linkHelper.createManufacturersLink()).thenReturn(Link.of("manufacturersLink"));
 
-        mockMvc.perform(patch("/api/v1/manufacturers/1")
+        mockMvc.perform(patch("/api/v1/manufacturers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"UpdatedProducer\"}")
                 .with(csrf()))

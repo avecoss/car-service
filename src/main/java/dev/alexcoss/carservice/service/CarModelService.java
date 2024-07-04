@@ -41,12 +41,10 @@ public class CarModelService {
     public CarModelDTO updateCarModel(CarModelDTO carModelDTO) {
         isValidCarModel(carModelDTO);
         CarModel existingCarModel = carModelRepository.findById(carModelDTO.getId())
-            .map(model -> {
-                model.setName(carModelDTO.getName());
-                model.setProducer(modelMapper.map(carModelDTO.getProducer(), Producer.class));
-                return model;
-            })
             .orElseThrow(() -> getEntityNotExistException(carModelDTO.getId()));
+
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(carModelDTO, existingCarModel);
 
         CarModel savedCarModel = carModelRepository.save(existingCarModel);
         return modelMapper.map(savedCarModel, CarModelDTO.class);

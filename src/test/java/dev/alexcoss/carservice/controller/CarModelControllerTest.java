@@ -80,7 +80,7 @@ class CarModelControllerTest {
         when(linkHelper.createSelfLink(anyLong())).thenReturn(Link.of("selfLink"));
         when(linkHelper.createModelsLink()).thenReturn(Link.of("modelsLink"));
 
-        mockMvc.perform(patch("/api/v1/models/1")
+        mockMvc.perform(patch("/api/v1/models")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"id\": 1, \"name\": \"UpdatedModel\", \"producer\": {\"id\": 1,\"name\":\"TestManufacturer\"}}")
                 .with(csrf()))

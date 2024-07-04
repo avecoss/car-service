@@ -44,11 +44,10 @@ public class ProducerService {
     public ProducerDTO updateProducer(ProducerDTO producerDTO) {
         isValidProducer(producerDTO);
         Producer existingProducer = producerRepository.findById(producerDTO.getId())
-            .map(producer -> {
-                producer.setName(producerDTO.getName());
-                return producer;
-            })
             .orElseThrow(() -> getEntityNotExistException(producerDTO.getId()));
+
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(producerDTO, existingProducer);
 
         Producer updatedProducer = producerRepository.save(existingProducer);
         return modelMapper.map(updatedProducer, ProducerDTO.class);

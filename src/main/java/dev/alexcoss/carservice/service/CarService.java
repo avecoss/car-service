@@ -3,8 +3,6 @@ package dev.alexcoss.carservice.service;
 import dev.alexcoss.carservice.dto.CarDTO;
 import dev.alexcoss.carservice.dto.CarFilterDTO;
 import dev.alexcoss.carservice.model.Car;
-import dev.alexcoss.carservice.model.CarModel;
-import dev.alexcoss.carservice.model.Category;
 import dev.alexcoss.carservice.repository.CarRepository;
 import dev.alexcoss.carservice.repository.CarSpecification;
 import dev.alexcoss.carservice.util.exception.EntityNotExistException;
@@ -15,9 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,18 +37,10 @@ public class CarService {
     @Transactional
     public CarDTO updateCar(CarDTO carDTO) {
         Car existingCar = carRepository.findById(carDTO.getId())
-            .map(car -> {
-                if (carDTO.getObjectId() != null) car.setObjectId(carDTO.getObjectId());
-                car.setYear(carDTO.getYear());
-                car.setCarModel(modelMapper.map(carDTO.getCarModel(), CarModel.class));
-                Set<Category> categories = carDTO.getCategories().stream()
-                    .map(categoryDTO -> modelMapper.map(categoryDTO, Category.class))
-                    .collect(Collectors.toSet());
-                car.setCategories(categories);
-
-                return car;
-            })
             .orElseThrow(() -> createEntityNotExistException(carDTO.getId()));
+
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(carDTO, existingCar);
 
         Car updated = carRepository.save(existingCar);
         return modelMapper.map(updated, CarDTO.class);

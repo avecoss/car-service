@@ -43,12 +43,10 @@ public class CarModelController {
         return ResponseEntity.created(location).body(createdCarModel);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<CarModelDTO> updateCarModel(@PathVariable Long id, @RequestBody @Validated CarModelDTO carModelDTO) {
-        carModelDTO.setId(id);
-
+    @PatchMapping
+    public ResponseEntity<CarModelDTO> updateCarModel(@RequestBody @Validated CarModelDTO carModelDTO) {
         CarModelDTO updatedCarModel = carModelService.updateCarModel(carModelDTO);
-        updatedCarModel.add(linkHelper.createSelfLink(id));
+        updatedCarModel.add(linkHelper.createSelfLink(carModelDTO.getId()));
         updatedCarModel.add(linkHelper.createModelsLink());
 
         return ResponseEntity.ok(updatedCarModel);
