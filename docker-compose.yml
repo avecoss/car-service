@@ -1,0 +1,14 @@
+name: car-rest-service
+
+services:
+
+    db_pg:
+        image: postgres:16-alpine
+        restart: always
+        environment:
+            POSTGRES_DB: cars_db
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: 1111
+        ports:
+            - "5433:5432"
+        container_name: "db-pg"
