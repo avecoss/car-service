@@ -12,3 +12,18 @@ services:
         ports:
             - "5433:5432"
         container_name: "db-pg"
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:25.0.1
+        restart: always
+        environment:
+            KEYCLOAK_ADMIN: admin
+            KEYCLOAK_ADMIN_PASSWORD: admin
+        ports:
+            - "8888:8080"
+        volumes:
+            - './config/keycloak:/opt/keycloak/data'
+        depends_on:
+            - db_pg
+        command: start-dev
+        container_name: "keycloak"
