@@ -4,6 +4,13 @@ import dev.alexcoss.carservice.controller.linkhelper.CarsLinkHelper;
 import dev.alexcoss.carservice.dto.CarDTO;
 import dev.alexcoss.carservice.dto.CarFilterDTO;
 import dev.alexcoss.carservice.service.CarService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +25,18 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/cars")
 @RequiredArgsConstructor
+@Tag(name = "Car", description = "Operations related to car")
 public class CarController {
 
     private final CarService carService;
     private final CarsLinkHelper linkHelper;
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get a car by ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CarDTO.class))),
+        @ApiResponse(responseCode = "404", description = "car not found")
+    })
     public ResponseEntity<CarDTO> getCar(@PathVariable Long id) {
         CarDTO carDTO = carService.getCarById(id);
         carDTO.add(linkHelper.createSelfLink(id));
@@ -33,6 +46,12 @@ public class CarController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new car", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "create car", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CarDTO.class))),
+        @ApiResponse(responseCode = "401"),
+        @ApiResponse(responseCode = "403")
+    })
     public ResponseEntity<CarDTO> createCar(@RequestBody @Validated CarDTO carDTO) {
         CarDTO createdCar = carService.createCar(carDTO);
         createdCar.add(linkHelper.createSelfLink(createdCar.getId()));
@@ -46,6 +65,13 @@ public class CarController {
     }
 
     @PatchMapping
+    @Operation(summary = "Update a car", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CarDTO.class))),
+        @ApiResponse(responseCode = "401"),
+        @ApiResponse(responseCode = "403"),
+        @ApiResponse(responseCode = "404")
+    })
     public ResponseEntity<CarDTO> updateCar(@RequestBody @Validated CarDTO carDTO) {
         CarDTO updatedCar = carService.updateCar(carDTO);
         updatedCar.add(linkHelper.createSelfLink(updatedCar.getId()));
@@ -55,6 +81,10 @@ public class CarController {
     }
 
     @GetMapping
+    @Operation(summary = "List all cars")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "successful operation")
+    })
     public ResponseEntity<Page<CarDTO>> listCars(
         @RequestParam(required = false) String manufacturer,
         @RequestParam(required = false) String model,
@@ -83,6 +113,13 @@ public class CarController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a car by ID", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "car deleted"),
+        @ApiResponse(responseCode = "401"),
+        @ApiResponse(responseCode = "403"),
+        @ApiResponse(responseCode = "404")
+    })
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();

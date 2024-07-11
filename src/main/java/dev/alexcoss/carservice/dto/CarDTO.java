@@ -1,5 +1,6 @@
 package dev.alexcoss.carservice.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
@@ -13,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Builder
+@Schema(description = "car information")
 public class CarDTO extends RepresentationModel<CarDTO> {
     private Long id;
     private String objectId;
