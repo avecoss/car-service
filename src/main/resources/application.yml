@@ -33,7 +33,7 @@ spring:
         oauth2:
             resourceserver:
                 jwt:
-                    issuer-uri: http://localhost:8888/realms/car-service-realm
+                    issuer-uri: http://localhost:8888/realms/car-realm
                     jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
     jwt:
@@ -49,3 +49,11 @@ logging:
         name: file.log
     level:
         root: info
+
+springdoc:
+    api-docs:
+        version: openapi_3_1
+    info:
+        title: Car API
+        version: 1.1.0
+        description: API documentation for Car service
