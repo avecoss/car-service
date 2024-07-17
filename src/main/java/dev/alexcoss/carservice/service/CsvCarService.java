@@ -18,9 +18,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -31,6 +30,10 @@ public class CsvCarService {
     private final ProducerRepository producerRepository;
     private final CarModelRepository carModelRepository;
     private final CategoryRepository categoryRepository;
+
+    private final Map<String, Producer> producerCache = new ConcurrentHashMap<>();
+    private final Map<String, CarModel> carModelCache = new ConcurrentHashMap<>();
+    private final Map<String, Category> categoryCache = new ConcurrentHashMap<>();
 
     @Transactional
     public void parseAndSaveCars(String filePath) {
@@ -55,6 +58,8 @@ public class CsvCarService {
     }
 
     private void saveCarsToDatabase(List<CarCsv> cars) {
+        List<Car> carEntities = new ArrayList<>();
+
         for (CarCsv carCsv : cars) {
             if (carCsv.getObjectId() == null) {
                 log.error("Illegal ID. ID cannot be null. Cannot save car.");
@@ -72,43 +77,45 @@ public class CsvCarService {
                 .categories(categories)
                 .build();
 
-            carRepository.saveAndFlush(car); //todo batch update !
+            carEntities.add(car);
+
         }
+        carRepository.saveAll(carEntities);
     }
 
     private Set<Category> getOrCreateCategories(CarCsv carCsv) {
         Set<Category> categories = new HashSet<>();
         for (String categoryName : carCsv.getCategory().split(",")) {
-            Category category = categoryRepository.findByName(categoryName.trim())
+            categories.add(categoryCache.computeIfAbsent(categoryName.trim(), name -> categoryRepository.findByName(name)
                 .orElseGet(() -> {
                     Category newCategory = Category.builder()
-                        .name(categoryName.trim())
+                        .name(name)
                         .build();
                     return categoryRepository.save(newCategory);
-                });
-            categories.add(category);
+                })));
         }
         return categories;
     }
 
     private CarModel getOrCreateCarModel(CarCsv carCsv, Producer producer) {
-        return carModelRepository.findByProducerNameAndName(carCsv.getModel(), producer.getName())
+        String key = carCsv.getModel() + "-" + producer.getName();
+        return carModelCache.computeIfAbsent(key, k -> carModelRepository.findByProducerNameAndName(carCsv.getModel(), producer.getName())
             .orElseGet(() -> {
                 CarModel newModel = CarModel.builder()
                     .name(carCsv.getModel())
                     .producer(producer)
                     .build();
                 return carModelRepository.save(newModel);
-            });
+            }));
     }
 
     private Producer getOrCreateProducer(CarCsv carCsv) {
-        return producerRepository.findByName(carCsv.getMake())
+        return producerCache.computeIfAbsent(carCsv.getMake(), name -> producerRepository.findByName(name)
             .orElseGet(() -> {
                 Producer newProducer = Producer.builder()
-                    .name(carCsv.getMake())
+                    .name(name)
                     .build();
                 return producerRepository.save(newProducer);
-            });
+            }));
     }
 }
