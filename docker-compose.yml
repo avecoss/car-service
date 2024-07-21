@@ -12,16 +12,18 @@ services:
         depends_on:
             - db_pg
         environment:
-            - SPRING_DATASOURCE_URL=jdbc:postgresql://db_pg:5432/cars_db
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://db_pg:5432/your_database_name
+            - SPRING_DATASOURCE_USERNAME=your_username
+            - SPRING_DATASOURCE_PASSWORD=your_password
         container_name: "api-car-service"
 
     db_pg:
         image: postgres:16-alpine
         restart: always
         environment:
-            POSTGRES_DB: cars_db
-            POSTGRES_USER: admin
-            POSTGRES_PASSWORD: 1111
+            POSTGRES_DB: your_database_name
+            POSTGRES_USER: your_username
+            POSTGRES_PASSWORD: your_password
         ports:
             - "5433:5432"
         container_name: "db-pg"
