@@ -33,7 +33,7 @@ This project is designed to manage car-related data using a REST API. It reads c
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/your-username/car-service.git
+    git clone https://github.com/avecoss/car-service.git
     cd car-service
     ```
 2. To configure your application to connect to a PostgreSQL database, add the following properties to your application.yml / docker-compose.yml file:
@@ -221,5 +221,6 @@ public class SecurityConfig {
 ```
 ### Swagger Documentation
 Swagger UI is available at `/swagger-ui.html` once the service is running. It provides an interactive interface to explore and test the API endpoints.
+![API Documentation](.swagger/swagger.png)
 ### Contributors
 - [avexcoss](https://github.com/avecoss)
