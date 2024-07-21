@@ -1,19 +1,19 @@
 name: car-rest-service
 
 services:
-    #api:
-    #    image: car-service
-    #    build:
-    #        context: .
-    #        dockerfile: Dockerfile
-    #    restart: always
-    #    ports:
-    #        - "8080:8080"
-    #    depends_on:
-    #        - db_pg
-    #    environment:
-    #        - SPRING_DATASOURCE_URL=jdbc:postgresql://db_pg:5432/cars_db
-    #    container_name: "api-car-service"
+    api:
+        image: car-service
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: always
+        ports:
+            - "8080:8080"
+        depends_on:
+            - db_pg
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://db_pg:5432/cars_db
+        container_name: "api-car-service"
 
     db_pg:
         image: postgres:16-alpine

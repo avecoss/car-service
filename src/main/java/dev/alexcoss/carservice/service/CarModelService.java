@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +62,7 @@ public class CarModelService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCarModel(Long id) {
         CarModel existingCarModel = carModelRepository.findById(id)
             .orElseThrow(() -> getEntityNotExistException(id));

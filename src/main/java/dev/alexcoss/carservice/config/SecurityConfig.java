@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/**").hasRole("admin")
+                .requestMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
 
             .sessionManagement(sessionManagement -> sessionManagement
